@@ -1,4 +1,4 @@
-# HEADLESS CHROME HEADLESS
+# HEADLESS CHROME API
 
 Is docker image to get html content of url for server side rendering using puppeteer, a chrome headless java script wrapper. the purpose of this project is originally to support [durian](https://https://github.com/mailtarget/durian) library.
 
