@@ -125,13 +125,16 @@ function removeFile(filename) {
 }
 
 async function loadPage(url, js = false) {
-    const page = await browser.newPage();
+    const context = await browser.createIncognitoBrowserContext();
+    const page = await context.newPage();
+    // const page = await browser.newPage();
     await page.setUserAgent(userAgent);
     if (js) {
         await page.goto(url, { waitUntil: 'networkidle0' });
     } else { 
         await page.goto(url);
     }
+    context.close()
     return page
 }
 
