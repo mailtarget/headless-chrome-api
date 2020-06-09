@@ -4,7 +4,7 @@
   "main": "server.js",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.16.4",
-    "puppeteer": "^1.10.0"
+    "express": "^4.17.1",
+    "puppeteer": "^3.1.0"
   }
 }
