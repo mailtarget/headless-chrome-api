@@ -28,7 +28,11 @@ let browser
 (async () => { 
     browser = await puppeteer.launch({
         headless: true,
-        ignoreHTTPSErrors: true
+        ignoreHTTPSErrors: true,
+        args: [
+            "--no-sandbox",
+            "--disable-gpu",
+        ]
     }); 
     fs.mkdir(screenshotDir, { recursive: true }, (err) => {
         if (err) throw err;
