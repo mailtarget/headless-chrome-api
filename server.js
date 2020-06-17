@@ -4,9 +4,11 @@ const port = 3000
 const puppeteer = require('puppeteer')
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.96 YaBrowser/20.4.0.3443 Yowser/2.5 Yptp/1.23 Safari/537.36'
 const fs = require('fs')
+const fp = require('path')
 const screenshotDir = '/tmp/screenshot/'
 const pdfDir = '/tmp/pdf/'
-
+const hbs = require('express-hbs')
+const mustache = require('mustache')
 
 let browser
 
@@ -27,11 +29,36 @@ let browser
     
 })();
 
+function relative(path) {
+    return fp.join(__dirname, path);
+}
+
 app.use(express.json());
+
+app.engine('hbs', hbs.express4());
+app.set('view engine', 'hbs');
+app.set('views', __dirname + '/views');
+
+app.use(express.static(relative('public')));
 
 app.get('/', (req, res) => {
     res.send('headless chrome api is ready to serve')
 }) 
+
+app.get('/generate/:template', (req, res) => {
+    const template = req.params.template
+    const data = req.query;
+    console.log(data)
+    try {
+        var content = fs.readFileSync(relative('templates/' + template), 'utf8');
+        const html = mustache.render(content, data)
+        res.send(html)
+    } catch (error) {
+        console.log(error)
+        res.status(500).send(error)
+    }
+})
+
 
 app.post('/content', async (req, res) => {
     const url = req.body.url
@@ -71,8 +98,11 @@ app.post('/screenshot', async (req, res) => {
     try {
         if (url) {
             console.log('open for screenshot: ' + url)
-            const page = await loadPage(url, js)
+            const context = await browser.createIncognitoBrowserContext();
+            const page = await loadPage(context, url, js)
             await page.screenshot(screenshotData)
+            page.close()
+            context.close()
             const filename = screenshotData.path
             res.sendFile(filename)
             res.on('finish', function() {
@@ -101,8 +131,11 @@ app.post('/pdf', async (req, res) => {
     try {
         if (url) {
             console.log('open for screenshot: ' + url)
-            const page = await loadPage(url, js)
+            const context = await browser.createIncognitoBrowserContext();
+            const page = await loadPage(context, url, js)
             await page.pdf(pdfData)
+            page.close()
+            context.close()
             const filename = pdfData.path
             res.sendFile(filename)
             res.on('finish', function() {
@@ -124,24 +157,23 @@ function removeFile(filename) {
     });
 }
 
-async function loadPage(url, js = false) {
-    const context = await browser.createIncognitoBrowserContext();
+async function loadPage(context, url, js = false) {
     const page = await context.newPage();
-    // const page = await browser.newPage();
     await page.setUserAgent(userAgent);
     if (js) {
         await page.goto(url, { waitUntil: 'networkidle0' });
     } else { 
         await page.goto(url);
     }
-    context.close()
     return page
 }
 
 async function ssr(url, js = false) {
-    const page = await loadPage(url, js)
+    const context = await browser.createIncognitoBrowserContext();
+    const page = await loadPage(context, url, js)
     const html = await page.content(); // serialized HTML of page DOM.
     page.close()
+    context.close()
     return html;
 }
 
