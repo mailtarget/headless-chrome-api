@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const port = 3000
 const puppeteer = require('puppeteer')
-const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.96 YaBrowser/20.4.0.3443 Yowser/2.5 Yptp/1.23 Safari/537.36'
+
 const fs = require('fs')
 const fp = require('path')
 const screenshotDir = '/tmp/screenshot/'
@@ -10,13 +10,25 @@ const pdfDir = '/tmp/pdf/'
 const hbs = require('express-hbs')
 const mustache = require('mustache')
 
+// request header
+// User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0
+const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0'
+// need to add this header for some request
+// Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+// const accept = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+// Accept-Language: en-US,en;q=0.5
+// const acceptLang = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+// Accept-Encoding: gzip, deflate, br
+// const acceptEncoding = 'gzip, deflate, br'
+// Upgrade-Insecure-Requests: 1
+// Connection: keep-alive
+
 let browser
 
 (async () => { 
     browser = await puppeteer.launch({
-        headless: true, 
-        slowMo: 250,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        headless: true,
+        ignoreHTTPSErrors: true
     }); 
     fs.mkdir(screenshotDir, { recursive: true }, (err) => {
         if (err) throw err;
@@ -160,11 +172,17 @@ function removeFile(filename) {
 async function loadPage(context, url, js = false) {
     const page = await context.newPage();
     await page.setUserAgent(userAgent);
+    page.setExtraHTTPHeaders({
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5'
+    });
     if (js) {
+        page.setJavaScriptEnabled(true)
         await page.goto(url, { waitUntil: 'networkidle0' });
     } else { 
         await page.goto(url);
     }
+    console.log(await page.title())
     return page
 }
 
