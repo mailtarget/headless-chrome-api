@@ -1,6 +1,9 @@
 FROM node:current-slim
 LABEL maintainer="MTARGET Developer <dev@mtarget.co>"
 
+# Install curl for health check
+RUN apt-get update && apt-get -y install curl
+
 # See https://crbug.com/795759
 # RUN apt-get update && apt-get install -yq libx11-6 libx11-xcb1 libgconf-2-4 libxcomposite1
 
