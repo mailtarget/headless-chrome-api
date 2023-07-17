@@ -5,8 +5,8 @@
   "license": "MIT",
   "dependencies": {
     "express": "^4.17.1",
-    "puppeteer": "^16.0.0",
+    "express-hbs": "^2.1.2",
     "mustache": "^4.0.1",
-    "express-hbs": "^2.1.2"
+    "puppeteer": "^20.8.2"
   }
 }
