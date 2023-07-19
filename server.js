@@ -182,7 +182,7 @@ async function loadPage(context, url, js = false) {
     });
     if (js) {
         page.setJavaScriptEnabled(true)
-        await page.goto(url, { waitUntil: 'networkidle0' });
+        await page.goto(url, {waitUntil: 'load', timeout: 0});
     } else { 
         await page.goto(url);
     }
