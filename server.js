@@ -27,7 +27,7 @@ let browser
 
 (async () => { 
     browser = await puppeteer.launch({
-        headless : 'new',
+        headless : true,
         ignoreHTTPSErrors: true,
         args: [
             "--no-sandbox",
